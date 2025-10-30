@@ -45,7 +45,7 @@ monitor_loop() {
     collect_metrics
     sleep "$interval"
 
-    stop automatically if any process ended
+    # stop automatically if any process ended
     for pid in "${PIDS[@]}"; do
       if ! ps -p "$pid" > /dev/null 2>&1; then
         echo "One or more apps exited; stopping monitoring loop."
