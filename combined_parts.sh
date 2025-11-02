@@ -176,32 +176,35 @@ collect_system_metrics() {
 
 # Main timed loop
 main_loop() {
-    while true; do
-        # Call Part 2 Function
-        collect_metrics
-        collect_system_metrics
+    
+    #Call Part 2 Function
+    monitor_loop "$INTERVAL" &
+    monitor_pid=$!
 
-        # Stop if any app exits
-        for pid in "${PIDS[@]}"; do
-            if ! ps -p "$pid" >/dev/null 2>&1; then
-                echo "Warning: one monitored app has exited. Stopping monitoring."
-                return
-            fi
-        done
+    while true; do
+        # Call Part 2 + 3 Function
+        collect_system_metrics
+        
+        # Stop if monitor loop exits
+        if ! ps -p "$monitor_pid" > /dev/null 2>&1; then
+            echo "Warning: Monitor Loop exited, Stopping main loop."
+            return
+        fi
         current_time=$(date +%s)
         elapsed_total=$(( current_time - START_TIME ))
 
-        # Stop if maximum duration reached
+        # Stop if maximum duration (seconds) reached
         if [ $elapsed_total -ge $MAX_DURATION ]
         then
             echo "Warning: max duration of $MAX_DURATION reached. Stopping monitoring."
+            kill "$monitor_pid"
             return
         fi
+        
         # Pause before next metrics collection
         sleep "$INTERVAL"
     done
 }
-
 # Call Part 1 functions
 pick_apps
 spawn_apps
