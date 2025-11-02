@@ -162,16 +162,47 @@ echo "seconds,RX_kB/s,TX_kB/s,disk_writes,available_disk" > "$SYSTEM_CSV"
 
 # Collect system level resource metrics and append data to system csv
 collect_system_metrics() {
-    local seconds rx tx disk_writes available_disk
+    local seconds rx tx disk_writes avail
+    local csv_file="${METRICS_CSV:-./system_metrics.csv}"
+    local iface="${INTERFACE:-ens33}"
+
+    # initialize START_TIME on first run
+    if [ -z "$START_TIME" ]; then
+        START_TIME=$(date +%s)
+        export START_TIME
+    fi
+
     seconds=$(( $(date +%s) - START_TIME ))
-    # Network RX and TX in kB/s
-    read rx tx < <(ifstat 1 1 | awk -v net="ens33" '$1==net {print $1, $2}')
-    # Disk writes in kB/s
-    disk_writes=$(iostat -d -k 1 2 | awk '$1=="sda" {print $3}')
-    # Available space on disks
-    available_disk=$(df -m / | awk 'NR==2 {print $4}')
-    # Append to CSV
-    echo "$seconds,$rx,$tx,$disk_writes,$available_disk" >> "$SYSTEM_CSV"
+
+    # --- RX / TX in kB/s
+    read rx tx < <(
+        ifstat -i "$iface" 1 2 2>/dev/null \
+        | awk 'NF && $1 ~ /^[0-9.]+$/ {rx=$1; tx=$2} END {print rx+0, tx+0}'
+    )
+    rx=${rx:-0}
+    tx=${tx:-0}
+
+    # --- Disk writes (kB/s)
+    disk_writes=$(
+        iostat -d -k 1 1 2>/dev/null \
+        | awk '
+        BEGIN{col=0; found=0}
+        # find header line that contains "Device"
+        /^Device/ {found=1; for (i=1;i<=NF;i++) if ($i ~ /wkB\/s|wK/){col=i; break} next}
+        # once header found, read the first device line and print the column (if found) or fallback to 4th field
+        found && NF {
+            if (col) { print $col; exit }
+            else { print $4; exit }
+        }'
+    )
+    disk_writes=${disk_writes:-0}
+
+    # --- Available disk space in MB.
+    avail=$(df -m --output=avail / 2>/dev/null | tail -n1 | tr -d ' ')
+    avail=${avail:-0}
+
+    # append a CSV line
+    printf '%s,%s,%s,%s,%s\n' "$seconds" "$rx" "$tx" "$disk_writes" "$avail" >> "$csv_file"
 }
 
 # Main timed loop
