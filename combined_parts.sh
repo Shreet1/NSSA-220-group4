@@ -165,7 +165,7 @@ collect_system_metrics() {
     local seconds rx tx disk_writes available_disk
     seconds=$(( $(date +%s) - START_TIME ))
     # Network RX and TX in kB/s
-    read rx tx < <(ifstat -i ens33 1 1 | awk 'NR==3 {print $1, $2}')
+    read rx tx < <(ifstat 1 1 | awk -v net="ens33" '$1==net {print $1, $2}')
     # Disk writes in kB/s
     disk_writes=$(iostat -d -k 1 2 | awk '$1=="sda" {print $3}')
     # Available space on disks
