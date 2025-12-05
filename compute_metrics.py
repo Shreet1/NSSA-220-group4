@@ -124,7 +124,7 @@ def compute(node_name, packets):
 def write_metrics(all_metrics, filename="metrics.txt"):
     with open(filename, "w") as f:
         for node, metrics in all_metrics.items():
-            f.write(f"{node}\n\n")
+            f.write(f"{node.replace('Node', 'Node ')}\n\n")
             f.write("Echo Requests Sent,Echo Requests Received,Echo Replies Sent,Echo Replies Received\n")
             f.write(f"{metrics['Echo Requests Sent']},{metrics['Echo Requests Received']},{metrics['Echo Replies Sent']},{metrics['Echo Replies Received']}\n")
             f.write("Echo Request Bytes Sent (bytes),Echo Request Data Sent (bytes)\n")
