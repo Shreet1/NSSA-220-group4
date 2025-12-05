@@ -73,7 +73,7 @@ def compute(node_name, packets):
     for rep in replies_rec:
         key = (rep["seq"], rep["src"])
         if key in seq_to_req_time:
-            rtt = (rep["time"] - seq_to_req_time[key]) * 1000  # sec -> ms
+            rtt = (rep["time"] - seq_to_req_time[key]) * 1000
             rtts.append(rtt)
     avg_rtt = round(sum(rtts)/len(rtts), 2) if rtts else 0
 
@@ -118,7 +118,7 @@ def compute(node_name, packets):
         "Echo Request Goodput (kB/sec)": goodput,
         "Average Reply Delay (microseconds)": avg_reply_delay,
         "Average Echo Request Hop Count": avg_hops
-    }
+}
 
 # Write to metrics file
 def write_metrics(all_metrics, filename="metrics.txt"):
