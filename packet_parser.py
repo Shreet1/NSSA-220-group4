@@ -1,9 +1,7 @@
-def parse_filtered_file(path):
+def parse_filtered_file(path, out_filename):
     """
-    Reads the filtered node text file and will return a list of packet dictionaries,
-    each containing the fields needed for metrics:
-
-        time, src, dst, type, seq, total_len, frame, payload, ttl
+    Reads the filtered node text file and writes a parsed summary file
+    containing: time src dst type seq total_len frame payload ttl
     """
     ETHERNET_HEADER_LEN = 14
     IP_HEADER_LEN = 20
@@ -13,7 +11,6 @@ def parse_filtered_file(path):
 
     with open(path, "r") as f:
         for line in f:
-            # Only process ping request/reply lines
             if "(ping) request" not in line and "(ping) reply" not in line:
                 continue
 
@@ -27,7 +24,7 @@ def parse_filtered_file(path):
                 dst_ip = parts[3]
                 frame_bytes = int(parts[5])
 
-                # Determine ICMP type
+                # ICMP type
                 if "request" in parts:
                     icmp_type = 8
                 elif "reply" in parts:
@@ -35,12 +32,11 @@ def parse_filtered_file(path):
                 else:
                     continue
 
-                # Extract seq= and ttl=
+                # seq and ttl
                 seq = None
                 ttl = None
                 for token in parts:
                     if token.startswith("seq="):
-                        # seq=91/23296, -> take 91
                         raw = token.split("=", 1)[1]
                         raw = raw.split("/", 1)[0]
                         raw = raw.rstrip(",")
@@ -54,13 +50,12 @@ def parse_filtered_file(path):
                 if seq is None or ttl is None:
                     continue
 
-                # Calculate IP total length & payload
                 ip_total_length = frame_bytes - ETHERNET_HEADER_LEN
                 payload = ip_total_length - IP_HEADER_LEN - ICMP_HEADER_LEN
                 if payload < 0:
                     payload = 0
 
-                packets.append({
+                packet = {
                     "time": time,
                     "src": src_ip,
                     "dst": dst_ip,
@@ -70,9 +65,23 @@ def parse_filtered_file(path):
                     "frame": frame_bytes,
                     "payload": payload,
                     "ttl": ttl
-                })
+                }
+
+                packets.append(packet)
 
             except Exception:
                 continue
 
+    # ----------------------------------------
+    # WRITE PARSED SUMMARY FILE
+    # ----------------------------------------
+    with open(out_filename, "w") as out:
+        out.write("time src dst type seq total_len frame payload ttl\n")
+        for p in packets:
+            out.write(
+                f"{p['time']} {p['src']} {p['dst']} {p['type']} "
+                f"{p['seq']} {p['total_len']} {p['frame']} {p['payload']} {p['ttl']}\n"
+            )
+
+    print(f"Created parsed summary file: {out_filename}")
     return packets
