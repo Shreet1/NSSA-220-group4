@@ -72,9 +72,7 @@ def parse_filtered_file(path, out_filename):
             except Exception:
                 continue
 
-    # ----------------------------------------
-    # WRITE PARSED SUMMARY FILE
-    # ----------------------------------------
+    # Write to output file for compute
     with open(out_filename, "w") as out:
         out.write("time src dst type seq total_len frame payload ttl\n")
         for p in packets:
@@ -84,4 +82,5 @@ def parse_filtered_file(path, out_filename):
             )
 
     print(f"Created parsed summary file: {out_filename}")
+
     return packets
