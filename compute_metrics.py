@@ -99,9 +99,12 @@ def compute(node_name, packets):
     avg_reply_delay = round(sum(reply_delays)/len(reply_delays), 2) if reply_delays else 0
 
     # Calculate average hop count
-    starting_ttl = max([p["ttl"] for p in replies_rec], default=118)
-    num_hops = [starting_ttl - p["ttl"] for p in replies_rec]
-    avg_hops = round(sum(num_hops)/len(num_hops), 2) if num_hops else 0
+    if replies_rec:
+        starting_ttl = max(p["ttl"] for p in replies_rec)
+        num_hops = [starting_ttl - p["ttl"] + 1 for p in replies_rec]
+        avg_hops = round(sum(num_hops)/len(num_hops), 2)
+    else:
+        avg_hops = 0
 
     # Return metrics as dictionary
     return {
@@ -113,10 +116,10 @@ def compute(node_name, packets):
         "Echo Request Data Sent (bytes)": total_req_p_sent,
         "Echo Request Bytes Received (bytes)": total_req_b_rec,
         "Echo Request Data Received (bytes)": total_req_p_rec,
-        "Average RTT (milliseconds)": avg_rtt,
+        "Average RTT (ms)": avg_rtt,
         "Echo Request Throughput (kB/sec)": throughput,
         "Echo Request Goodput (kB/sec)": goodput,
-        "Average Reply Delay (microseconds)": avg_reply_delay,
+        "Average Reply Delay (us)": avg_reply_delay,
         "Average Echo Request Hop Count": avg_hops
 }
 
@@ -131,10 +134,10 @@ def write_metrics(all_metrics, filename="metrics.txt"):
             f.write(f"{metrics['Echo Request Bytes Sent (bytes)']},{metrics['Echo Request Data Sent (bytes)']}\n")
             f.write("Echo Request Bytes Received (bytes),Echo Request Data Received (bytes)\n")
             f.write(f"{metrics['Echo Request Bytes Received (bytes)']},{metrics['Echo Request Data Received (bytes)']}\n\n")
-            f.write(f"Average RTT (milliseconds),{metrics['Average RTT (milliseconds)']}\n")
+            f.write(f"Average RTT (ms),{metrics['Average RTT (ms)']}\n")
             f.write(f"Echo Request Throughput (kB/sec),{metrics['Echo Request Throughput (kB/sec)']}\n")
             f.write(f"Echo Request Goodput (kB/sec),{metrics['Echo Request Goodput (kB/sec)']}\n")
-            f.write(f"Average Reply Delay (microseconds),{metrics['Average Reply Delay (microseconds)']}\n")
+            f.write(f"Average Reply Delay (us),{metrics['Average Reply Delay (us)']}\n")
             f.write(f"Average Echo Request Hop Count,{metrics['Average Echo Request Hop Count']}\n\n")
     print(f"File created: {filename}")
 
