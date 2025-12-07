@@ -79,7 +79,7 @@ def compute(node_name, packets):
 
     # Calculate Echo Request throughput and goodput (kB/sec)
     if requests_sent and replies_rec:
-        total_time_sec = sum(rtts)/1000 if rtts else 0
+        total_time_sec = sum(rtts)/1000
     else:
         total_time_sec = 0
     throughput = round(total_req_b_sent / 1024 / total_time_sec, 2) if total_time_sec else 0
@@ -116,10 +116,10 @@ def compute(node_name, packets):
         "Echo Request Data Sent (bytes)": total_req_p_sent,
         "Echo Request Bytes Received (bytes)": total_req_b_rec,
         "Echo Request Data Received (bytes)": total_req_p_rec,
-        "Average RTT (ms)": avg_rtt,
+        "Average RTT (milliseconds)": avg_rtt,
         "Echo Request Throughput (kB/sec)": throughput,
         "Echo Request Goodput (kB/sec)": goodput,
-        "Average Reply Delay (us)": avg_reply_delay,
+        "Average Reply Delay (microseconds)": avg_reply_delay,
         "Average Echo Request Hop Count": avg_hops
 }
 
@@ -134,10 +134,10 @@ def write_metrics(all_metrics, filename="metrics.txt"):
             f.write(f"{metrics['Echo Request Bytes Sent (bytes)']},{metrics['Echo Request Data Sent (bytes)']}\n")
             f.write("Echo Request Bytes Received (bytes),Echo Request Data Received (bytes)\n")
             f.write(f"{metrics['Echo Request Bytes Received (bytes)']},{metrics['Echo Request Data Received (bytes)']}\n\n")
-            f.write(f"Average RTT (ms),{metrics['Average RTT (ms)']}\n")
+            f.write(f"Average RTT (milliseconds),{metrics['Average RTT (milliseconds)']}\n")
             f.write(f"Echo Request Throughput (kB/sec),{metrics['Echo Request Throughput (kB/sec)']}\n")
             f.write(f"Echo Request Goodput (kB/sec),{metrics['Echo Request Goodput (kB/sec)']}\n")
-            f.write(f"Average Reply Delay (us),{metrics['Average Reply Delay (us)']}\n")
+            f.write(f"Average Reply Delay (microseconds),{metrics['Average Reply Delay (microseconds)']}\n")
             f.write(f"Average Echo Request Hop Count,{metrics['Average Echo Request Hop Count']}\n\n")
     print(f"File created: {filename}")
 
