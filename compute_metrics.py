@@ -124,7 +124,7 @@ def compute(node_name, packets):
 }
 
 # Write to metrics file
-def write_metrics(all_metrics, filename="metrics.txt"):
+def write_metrics(all_metrics, filename="metrics.csv"):
     with open(filename, "w") as f:
         for node, metrics in all_metrics.items():
             f.write(f"{node.replace('Node', 'Node ')}\n\n")
