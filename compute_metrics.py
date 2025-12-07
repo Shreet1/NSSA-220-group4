@@ -75,15 +75,15 @@ def compute(node_name, packets):
         if key in seq_to_req_time:
             rtt = (rep["time"] - seq_to_req_time[key]) * 1000
             rtts.append(rtt)
-    avg_rtt = round(sum(rtts)/len(rtts), 2) if rtts else 0
+    avg_rtt = round(sum(rtts)/len(rtts), 2)
 
     # Calculate Echo Request throughput and goodput (kB/sec)
     if requests_sent and replies_rec:
         total_time_sec = sum(rtts)/1000
     else:
         total_time_sec = 0
-    throughput = round(total_req_b_sent / 1024 / total_time_sec, 2) if total_time_sec else 0
-    goodput = round(total_req_p_sent / 1024 / total_time_sec, 2) if total_time_sec else 0
+    throughput = round(total_req_b_sent / 1024 / total_time_sec, 2)
+    goodput = round(total_req_p_sent / 1024 / total_time_sec, 2)
 
     # Calculate average reply delay (microseconds)
     seq_src_to_req_time = {}
@@ -93,10 +93,10 @@ def compute(node_name, packets):
     for rep in replies_sent:
         key = (rep["seq"], rep["dst"])
         if key in seq_src_to_req_time:
-            delay = (rep["time"] - seq_src_to_req_time[key]) * 1_000_000
+            delay = (rep["time"] - seq_src_to_req_time[key]) * 1000000
             reply_delays.append(delay)
 
-    avg_reply_delay = round(sum(reply_delays)/len(reply_delays), 2) if reply_delays else 0
+    avg_reply_delay = round(sum(reply_delays)/len(reply_delays), 2)
 
     # Calculate average hop count
     if replies_rec:
